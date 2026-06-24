@@ -1,0 +1,8 @@
+.idea/
+out/
+*.iml
+target/
+*.class
+*.jar
+*.log
+.DS_Store
