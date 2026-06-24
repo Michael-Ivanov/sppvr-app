@@ -1,8 +1,10 @@
 package com.cardio.sppvr.ui;
 
+import com.cardio.sppvr.dao.UserDAO;
 import com.cardio.sppvr.model.SystemUser;
 import com.cardio.sppvr.service.AuthService;
 import com.cardio.sppvr.ui.components.MessageDialog;
+import com.cardio.sppvr.ui.components.PuzzleCaptcha;
 
 import javax.swing.*;
 import java.awt.*;
@@ -19,6 +21,8 @@ public class LoginForm extends JFrame {
     private final JPasswordField passwordField = new JPasswordField(20);
     private final JButton        loginButton   = new JButton("Войти");
     private final AuthService    authService   = new AuthService();
+    private final UserDAO        userDAO       = new UserDAO();
+    private final PuzzleCaptcha  puzzleCaptcha = new PuzzleCaptcha();
 
     public LoginForm() {
         configureWindow();
@@ -30,7 +34,7 @@ public class LoginForm extends JFrame {
     private void configureWindow() {
         setTitle("СППВР Кардиологическая клиника — Авторизация");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setMinimumSize(new Dimension(450, 350));
+        setMinimumSize(new Dimension(450, 520));
         setResizable(false);
         setLocationRelativeTo(null);
     }
@@ -59,6 +63,21 @@ public class LoginForm extends JFrame {
 
         addLabeledField(mainPanel, gbc, "Логин:", loginField);
         addLabeledField(mainPanel, gbc, "Пароль:", passwordField);
+
+        gbc.gridy++; gbc.gridwidth = 2; gbc.insets = new Insets(8, 0, 3, 0);
+        JLabel captchaHint = new JLabel("Соберите изображение (кликните фрагменты 1→2→3→4):", SwingConstants.CENTER);
+        captchaHint.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        captchaHint.setForeground(new Color(117, 117, 117));
+        mainPanel.add(captchaHint, gbc);
+
+        gbc.gridy++; gbc.insets = new Insets(0, 0, 3, 0);
+        mainPanel.add(puzzleCaptcha, gbc);
+
+        gbc.gridy++; gbc.insets = new Insets(3, 0, 10, 0);
+        JButton shuffleBtn = new JButton("Перемешать");
+        shuffleBtn.setFont(new Font("Segoe UI", Font.PLAIN, 11));
+        shuffleBtn.addActionListener(e -> puzzleCaptcha.shuffle());
+        mainPanel.add(shuffleBtn, gbc);
 
         gbc.gridy++; gbc.insets = new Insets(20, 0, 15, 0);
         styleButton(loginButton, new Color(21, 101, 192), Color.WHITE);
@@ -102,12 +121,21 @@ public class LoginForm extends JFrame {
             return;
         }
 
+        if (!puzzleCaptcha.isSolved()) {
+            incrementFailedAttempts(login);
+            MessageDialog.showError(this,
+                    "Капча не пройдена. Соберите изображение, кликнув фрагменты в правильном порядке (1→2→3→4).");
+            puzzleCaptcha.shuffle();
+            return;
+        }
+
         try {
             AuthService.AuthResult result = authService.authenticate(login, password);
 
             if (result == AuthService.AuthResult.INVALID) {
                 MessageDialog.showError(this,
                         "Вы ввели неверный логин или пароль. Пожалуйста проверьте ещё раз введенные данные.");
+                puzzleCaptcha.shuffle();
             } else if (result == AuthService.AuthResult.BLOCKED) {
                 MessageDialog.showError(this,
                         "Вы заблокированы. Обратитесь к администратору.");
@@ -134,6 +162,21 @@ public class LoginForm extends JFrame {
             JOptionPane.showMessageDialog(this,
                     "Добро пожаловать, " + user.getLogin() + "!\nРабочий стол врача (разрабатывается).",
                     "СППВР", JOptionPane.INFORMATION_MESSAGE);
+        }
+    }
+
+    private void incrementFailedAttempts(String login) {
+        if (login.isEmpty()) return;
+        try {
+            SystemUser user = userDAO.findByLogin(login);
+            if (user != null) {
+                int newAttempts = user.getFailedAttempts() + 1;
+                userDAO.updateFailedAttempts(user.getUserId(), newAttempts);
+                if (newAttempts >= 3) {
+                    userDAO.blockUser(user.getUserId());
+                }
+            }
+        } catch (Exception ignored) {
         }
     }
 }
