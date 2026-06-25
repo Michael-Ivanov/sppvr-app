@@ -31,7 +31,7 @@ public class UserService {
         }
         SystemUser user = new SystemUser();
         user.setLogin(login);
-        user.setPasswordHash(String.valueOf(Objects.hash(password)));
+        user.setPasswordHash(AuthService.BCrypt.hashpw(password, AuthService.BCrypt.gensalt()));
         user.setRole(role);
         userDAO.create(user);
         return true;

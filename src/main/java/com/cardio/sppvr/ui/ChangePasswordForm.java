@@ -63,6 +63,8 @@ public class ChangePasswordForm extends JFrame {
         changeButton.setForeground(Color.WHITE);
         changeButton.setFont(new Font("Segoe UI", Font.BOLD, 13));
         changeButton.setPreferredSize(new Dimension(0, 36));
+        changeButton.setOpaque(true);
+        changeButton.setBorderPainted(false);
         changeButton.addActionListener(e -> performChange());
         panel.add(changeButton, gbc);
 
@@ -86,6 +88,16 @@ public class ChangePasswordForm extends JFrame {
             return;
         }
 
+        if (!newPass.equals(conf)) {
+            MessageDialog.showError(this, "Новый пароль и подтверждение не совпадают.");
+            return;
+        }
+
+        if (newPass.length() < 8) {
+            MessageDialog.showError(this, "Новый пароль должен содержать не менее 8 символов.");
+            return;
+        }
+
         try {
             boolean ok = authService.changePassword(userId, cur, newPass, conf);
             if (ok) {
@@ -93,10 +105,10 @@ public class ChangePasswordForm extends JFrame {
                 dispose();
                 onSuccess.run();
             } else {
-                MessageDialog.showError(this,
-                        "Ошибка при смене пароля. Проверьте текущий пароль и совпадение нового с подтверждением.");
+                MessageDialog.showError(this, "Неверный текущий пароль.");
             }
         } catch (Exception ex) {
+            ex.printStackTrace();
             MessageDialog.showError(this, "Ошибка соединения с сервером.");
         }
     }

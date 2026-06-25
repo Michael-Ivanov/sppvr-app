@@ -115,6 +115,8 @@ public class AdminPanelForm extends JFrame {
         btn.setBackground(bg);
         btn.setForeground(fg);
         btn.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        btn.setOpaque(true);
+        btn.setBorderPainted(false);
     }
 
     private void refreshTable() {

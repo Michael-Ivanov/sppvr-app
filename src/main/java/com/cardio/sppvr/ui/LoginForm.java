@@ -34,7 +34,7 @@ public class LoginForm extends JFrame {
     private void configureWindow() {
         setTitle("СППВР Кардиологическая клиника — Авторизация");
         setDefaultCloseOperation(EXIT_ON_CLOSE);
-        setMinimumSize(new Dimension(450, 520));
+        setMinimumSize(new Dimension(450, 620));
         setResizable(false);
         setLocationRelativeTo(null);
     }
@@ -105,6 +105,8 @@ public class LoginForm extends JFrame {
         btn.setForeground(fg);
         btn.setFont(new Font("Segoe UI", Font.BOLD, 14));
         btn.setPreferredSize(new Dimension(0, 36));
+        btn.setOpaque(true);
+        btn.setBorderPainted(false);
     }
 
     private void configureTabOrder() {
@@ -151,6 +153,7 @@ public class LoginForm extends JFrame {
                 dispose();
             }
         } catch (Exception ex) {
+            ex.printStackTrace();
             MessageDialog.showError(this, "Ошибка соединения с сервером.");
         }
     }
@@ -160,7 +163,7 @@ public class LoginForm extends JFrame {
             new AdminPanelForm(user);
         } else {
             JOptionPane.showMessageDialog(this,
-                    "Добро пожаловать, " + user.getLogin() + "!\nРабочий стол врача (разрабатывается).",
+                    "Добро пожаловать, " + user.getLogin() + "!\nРабочий стол врача.",
                     "СППВР", JOptionPane.INFORMATION_MESSAGE);
         }
     }

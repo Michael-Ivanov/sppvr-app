@@ -6,6 +6,7 @@ import com.cardio.sppvr.model.SystemUser;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.Objects;
 
 /**
  * Сервис аутентификации. Инкапсулирует бизнес-логику:
@@ -111,9 +112,9 @@ public class AuthService {
     // ──────────────────────────────────────────────
 
     /** Обёртка над org.mindrot.jbcrypt.BCrypt для изоляции зависимости. */
-    private static class BCrypt {
-//        static boolean checkpw(String plain, String hashed)  { return org.mindrot.jbcrypt.BCrypt.checkpw(plain, hashed); }
-//        static String  hashpw(String plain, String salt)     { return org.mindrot.jbcrypt.BCrypt.hashpw(plain, salt); }
-//        static String  gensalt()                             { return org.mindrot.jbcrypt.BCrypt.gensalt(); }
+    static class BCrypt {
+        static boolean checkpw(String plain, String hashed)  { return org.mindrot.jbcrypt.BCrypt.checkpw(plain, hashed); }
+        static String  hashpw(String plain, String salt)     { return org.mindrot.jbcrypt.BCrypt.hashpw(plain, salt); }
+        static String  gensalt()                             { return org.mindrot.jbcrypt.BCrypt.gensalt(); }
     }
 }
